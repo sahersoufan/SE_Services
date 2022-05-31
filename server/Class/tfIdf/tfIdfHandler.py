@@ -1,5 +1,5 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import linear_kernel
+from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 import pandas as pd
 import numpy as np
 from ..seCore import names
@@ -21,7 +21,7 @@ def makeTfIdfMatrix(data_frame:pd.DataFrame):
         if data_frame[names.getJobTitle()].isnull().values.any():
             data_frame[names.getJobTitle()] = data_frame[names.getJobTitle()].fillna("")
         tfIdfMatrix = tfidf.fit_transform(data_frame[names.getJobTitle()])
-        return tfIdfMatrix, tfidf.vocabulary_
+        return tfIdfMatrix
     except:
         print("error in makeTfIdfMatrix() from tfIdfHandler module")
         raise Exception
@@ -47,9 +47,9 @@ def vectQuery(query):
     return tfidf.transform([query])
 
 
-def makeCosSim(tfidfMatrix, query) -> np.ndarray:
+def makeCosSim(query, tfidfMatrix) -> np.ndarray:
     """ build a table of cosine similarity from the tf idf matrix with query"""
-    cosine_sim = linear_kernel(tfidfMatrix, query)
+    cosine_sim = cosine_similarity(query, tfidfMatrix).flatten()
     return cosine_sim
 
 

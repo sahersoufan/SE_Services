@@ -16,25 +16,36 @@ from . import names
 tfidfM = None
 data_frame = None
 
+
+
+def setSqlInfo(info:dict):
+    '''initialize sql connection information '''
+    dbHandler.setSqlInfo(info)
+
+
+
+
 def initiate():
     """get a hole data and build the recoSys from point zero with new db"""
     try:
         print('get data from db')
         global tfidfM, data_frame
         data = pd.read_sql('jobs', con=dbHandler.engine, columns=[names.getJobId(), names.getJobTitle()])
+
         data_frame = pd.DataFrame(data)
         print('data is here, now we will clean it :)')
         
         data_frame = cleaningHelper.cleanData(data_frame)
         print('data cleanned, building tfidf matrix')
-        tfidfM, voc = tfIdfHandler.makeTfIdfMatrix(data_frame=data_frame)
+
+        tfidfM = tfIdfHandler.makeTfIdfMatrix(data_frame=data_frame)
         print('tfidf matrix is here, now we build cosin similarity and indicies')
         
     
-        if(os.path.exists(os.path.join(os.getcwd(), names.getVoc()))):
-            os.remove(os.path.join(os.getcwd(), names.getVoc()))
-        pickle.dump(voc, open(os.path.join(os.getcwd(), names.getVoc()), "wb"))
-        print('saving is done')
+        # if(os.path.exists(os.path.join(os.getcwd(), names.getVoc()))):
+        #     os.remove(os.path.join(os.getcwd(), names.getVoc()))
+        # pickle.dump(voc, open(os.path.join(os.getcwd(), names.getVoc()), "wb"))
+        # print('saving is done')
     except:
         print('error in initiate func')
         raise exception
@@ -71,7 +82,8 @@ def getS(userData : dict):
     services = {'id' : []}
     global tfidfM, data_frame
     vectQuery = tfIdfHandler.vectQuery(userData.get('title'))
-    result = tfIdfHandler.makeCosSim(tfidfM, vectQuery)
+    result = tfIdfHandler.makeCosSim(vectQuery, tfidfM)
+
     lis:np.ndarray = result.argsort(axis=0)[-50:][::-1]
     services.get('id').append(lis.tolist())
     for i in lis:

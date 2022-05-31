@@ -1,33 +1,47 @@
 from Class.seCore import seCore
 from flask import Flask, jsonify, request
 
+
+myPort = 8051
 app = Flask(__name__)
 
 
-@app.route('/')
-def hello():
-    return 'this is my first api'
+@app.route('/setSqlInfo', methods=["POST"])
+def setSqlInfo():
+    try:
+        sqlInfo = request.get_json(force=True)
+        seCore.setSqlInfo(sqlInfo)
+        return jsonify(success=True)
+    except:
+        return jsonify(success=False)
 
-@app.route('/post', methods=["POST"])
-def post():
-    input_json = request.get_json(force=True)
-    dictToReturn = {'data':input_json['data']}
-    return jsonify(dictToReturn['data'])
 
-@app.route('/initializeSE', methods=['GET'])
+@app.route('/initializeSE', methods=['POST'])
 def initiate():
-    seCore.initiate()
-    return 'bla bla'
-@app.route('/updateSE', methods=['GET'])
-async def update():
-    await seCore.update()
-    return 'bla bla'
+    try:
+        seCore.initiate()
+        return jsonify(success=True)
+    except:
+        return jsonify(success=False)
+
+
+# @app.route('/updateSE', methods=['GET'])
+# async def update():
+#     try:
+#         await seCore.update()
+#         return jsonify(success=True)
+#     except:
+#         return jsonify(success=False)
+
 
 @app.route('/getS', methods=['POST'])
-def getRecommend():
-    query = request.get_json(force=True)
-    r = seCore.getS(query)
-    return jsonify(r)
+def getS():
+    try:
+        query = request.get_json(force=True)
+        r = seCore.getS(query)
+        return jsonify(r)
+    except:
+        return jsonify(success=False)
 
-
-app.run(port=3001)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=myPort)
