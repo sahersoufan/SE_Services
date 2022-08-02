@@ -30,7 +30,7 @@ def initiate():
     try:
         print('get data from db')
         global tfidfM, data_frame
-        data = pd.read_sql('jobs', con=dbHandler.engine, columns=[names.getJobId(), names.getJobTitle()])
+        data = pd.read_sql(names.getServiceModel(), con=dbHandler.engine, columns=[names.getJobId(), names.getJobTitle()])
 
         data_frame = pd.DataFrame(data)
         print('data is here, now we will clean it :)')
@@ -85,9 +85,13 @@ def getS(userData : dict):
     result = tfIdfHandler.makeCosSim(vectQuery, tfidfM)
 
     lis:np.ndarray = result.argsort(axis=0)[-50:][::-1]
-    services.get('id').append(lis.tolist())
+    # services.get('id').append(lis.tolist())
+
+    tempreslis = []
     for i in lis:
         print(data_frame.iloc[i,0],"--",data_frame.iloc[i,1])
+        # tempreslis.append(data_frame.iloc[i,0])
+        services.get('id').append(int(data_frame.iloc[i,0]))
     return services
 
 
